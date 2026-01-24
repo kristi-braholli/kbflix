@@ -88,7 +88,7 @@ export default function MovieModal({ movie, onClose }: any) {
             initPlayer();
         } else {
             console.log("Loading YouTube API");
-            if (!window.YT) {
+            if (!window?.YT) {
                 const tag = document.createElement('script');
                 tag.src = 'https://www.youtube.com/iframe_api';
                 const firstScriptTag = document.getElementsByTagName('script')[0];

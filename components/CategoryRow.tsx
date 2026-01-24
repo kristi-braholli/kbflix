@@ -8,7 +8,7 @@ interface Movie {
 
 interface CategoryRowProps {
     title: string;
-    movies: Movie[];
+    movies: any;
     isGrid?: boolean;
     onSelectMovie: (movie: Movie) => void; // ✅ New prop
 }
@@ -20,7 +20,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, movies, isGrid = false
 
             {isGrid ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {movies.map((movie) => (
+                    {movies.map((movie: any) => (
                         <div
                             onClick={() => onSelectMovie(movie)}
                             key={movie.id}
@@ -37,7 +37,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ title, movies, isGrid = false
                 </div>
             ) : (
                 <div className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide touch-pan-x">
-                    {movies.map((movie) => (
+                    {movies.map((movie: any) => (
                         <div
                             onClick={() => onSelectMovie(movie)}
                             key={movie.id}

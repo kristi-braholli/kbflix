@@ -8,7 +8,7 @@ import useInfoModal from "@/hooks/useInfoModal";
 import useMuteBillboard from "@/hooks/useMuteBillboard";
 
 interface BillboardProps {
-    onOpenModal: (movieId: string) => void;
+    onOpenModal: (movieId: any) => void;
 }
 
 const Billboard: React.FC<BillboardProps> = ({ onOpenModal }) => {
@@ -27,7 +27,7 @@ const Billboard: React.FC<BillboardProps> = ({ onOpenModal }) => {
     }, [onOpenModal, data?.id])
 
     useEffect(() => {
-        if (!window.YT) {
+        if (!window?.YT) {
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             const firstScriptTag = document.getElementsByTagName('script')[0];

@@ -1,7 +1,7 @@
 // pages/api/suggestions.ts
 import tmdb from "@/lib/tmdb";
 
-export default async function handler(req, res) {
+export default async function handler(req: any, res: any) {
     const { query } = req.body;
 
     if (!query) return res.status(400).json({ suggestions: [] });

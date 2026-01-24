@@ -5,3 +5,12 @@ declare global {
         var prismadb: PrismaClient;
     }
 }
+
+export {};
+
+declare global {
+    interface Window {
+        YT?: any;
+        onYouTubeIframeAPIReady?: () => void;
+    }
+}
