@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import tmdb from "@/lib/tmdb";
 
-export default function MovieModal({ movie, onClose }: any) {
+export default function MovieModal({ movie, onClose, openedFromMoreInfo = false }: any) {
     const [trailerKey, setTrailerKey] = useState<string | null>(null);
     const [details, setDetails] = useState<any>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
-    const [isWatchingMovie, setIsWatchingMovie] = useState(false); // ✅ New state
-    const [imdbId, setImdbId] = useState<string | null>(null); // ✅ New state
+    const [isWatchingMovie, setIsWatchingMovie] = useState(openedFromMoreInfo);
+    const [imdbId, setImdbId] = useState<string | null>(null);
     const playerRef = useRef<any>(null);
 
     useEffect(() => {
