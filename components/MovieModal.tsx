@@ -32,78 +32,58 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
     }, [movie.id]);
 
     useEffect(() => {
-        if (!trailerKey || isWatchingMovie) return; // ✅ Don't init player if watching movie
+        if (!trailerKey || isWatchingMovie) return;
+
+        let interval: any;
 
         const initPlayer = () => {
-            // Destroy existing player if any
-            if (playerRef.current) {
-                try {
-                    playerRef.current.destroy();
-                } catch (e) {
-                    console.log("Player destroy error:", e);
-                }
-            }
+            if (!window.YT || !window.YT.Player) return;
+
+            if (playerRef.current) return;
 
             const playerId = `modal-player-${movie.id}`;
 
-            try {
-                playerRef.current = new window.YT.Player(playerId, {
-                    videoId: trailerKey,
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 0,
-                        modestbranding: 1,
-                        showinfo: 0,
-                        rel: 0,
-                        fs: 0,
-                        iv_load_policy: 3,
-                        disablekb: 1,
-                        playsinline: 1,
-                        mute: 0
+            playerRef.current = new window.YT.Player(playerId, {
+                videoId: trailerKey,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    modestbranding: 1,
+                    rel: 0,
+                    fs: 0,
+                    playsinline: 1,
+                    mute: 1, // 🔥 MUST BE MUTED
+                },
+                events: {
+                    onReady: (e: any) => {
+                        e.target.mute();       // 🔥 force mute
+                        e.target.playVideo(); // 🔥 then play
+                        setIsMuted(true);
+                        setIsPlaying(true);
                     },
-                    events: {
-                        onStateChange: (event: any) => {
-                            setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
+                    onStateChange: (e: any) => {
+                        setIsPlaying(e.data === window.YT.PlayerState.PLAYING);
+                    },
+                },
+            });
 
-                            if (event.data === window.YT.PlayerState.ENDED) {
-                                playerRef.current.seekTo(0);
-                                playerRef.current.pauseVideo();
-                                setIsPlaying(false);
-                            }
-                        },
-                        onReady: (event: any) => {
-                            console.log("Player ready!");
-                            event.target.playVideo();
-                            setIsPlaying(true);
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error("Error creating player:", e);
-            }
+            clearInterval(interval);
         };
 
-        if (window.YT && window.YT.Player) {
-            console.log("YouTube API already loaded, initializing player");
-            initPlayer();
-        } else {
-            console.log("Loading YouTube API");
-            if (!window?.YT) {
-                const tag = document.createElement('script');
-                tag.src = 'https://www.youtube.com/iframe_api';
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-            }
-            window.onYouTubeIframeAPIReady = initPlayer;
+        if (!window.YT) {
+            const tag = document.createElement("script");
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(tag);
         }
 
+        interval = setInterval(initPlayer, 300);
+
         return () => {
+            clearInterval(interval);
             if (playerRef.current) {
                 try {
                     playerRef.current.destroy();
-                } catch (e) {
-                    console.log("Cleanup error:", e);
-                }
+                } catch {}
                 playerRef.current = null;
             }
         };

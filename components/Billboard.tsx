@@ -27,45 +27,55 @@ const Billboard: React.FC<BillboardProps> = ({ onOpenModal }) => {
     }, [onOpenModal, data?.id])
 
     useEffect(() => {
-        if (!window?.YT) {
-            const tag = document.createElement('script');
-            tag.src = 'https://www.youtube.com/iframe_api';
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-        }
+        let interval: any;
 
-        window.onYouTubeIframeAPIReady = () => {
-            if (data?.videoUrl) {
-                const videoId = new URL(data.videoUrl).searchParams.get('v') ||
-                    data.videoUrl.split('/').pop()?.split('?')[0];
+        const loadPlayer = () => {
+            if (window.YT && window.YT.Player && data?.videoUrl) {
+                const videoId =
+                    new URL(data.videoUrl).searchParams.get("v") ||
+                    data.videoUrl.split("/").pop()?.split("?")[0];
 
-                playerRef.current = new window.YT.Player('billboard-player', {
-                    videoId: videoId,
+                if (playerRef.current) return;
+
+                playerRef.current = new window.YT.Player("billboard-player", {
+                    videoId,
                     playerVars: {
                         autoplay: 1,
                         controls: 0,
                         modestbranding: 1,
-                        showinfo: 0,
                         rel: 0,
                         fs: 0,
-                        iv_load_policy: 3,
                         mute: 1,
                         loop: 1,
-                        playlist: videoId
+                        playlist: videoId,
                     },
                     events: {
-                        onStateChange: (event: any) => {
-                            setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
-                        },
-                        onReady: (event: any) => {
-                            event.target.playVideo();
+                        onReady: (e: any) => {
+                            e.target.mute();
+                            e.target.playVideo();
                             setIsPlaying(true);
-                        }
-                    }
+                        },
+                        onStateChange: (e: any) => {
+                            setIsPlaying(e.data === window.YT.PlayerState.PLAYING);
+                        },
+                    },
                 });
+
+                clearInterval(interval);
             }
         };
+
+        if (!window.YT) {
+            const tag = document.createElement("script");
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(tag);
+        }
+
+        interval = setInterval(loadPlayer, 300);
+
+        return () => clearInterval(interval);
     }, [data?.videoUrl]);
+
 
     const handleToggleMute = () => {
         if (playerRef.current) {
