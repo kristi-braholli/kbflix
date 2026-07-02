@@ -10,18 +10,27 @@ import fetcher from "@/lib/fetcher";
 import { UserSummary } from "@/lib/users";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-    const session = await getServerSession(context.req, context.res, authOptions);
+    try {
+        const session = await getServerSession(context.req, context.res, authOptions);
 
-    if (!session?.user?.isAdmin) {
+        if (!session?.user?.isAdmin) {
+            return {
+                redirect: {
+                    destination: "/",
+                    permanent: false,
+                },
+            };
+        }
+
+        return { props: {} };
+    } catch {
         return {
             redirect: {
-                destination: "/",
+                destination: "/auth",
                 permanent: false,
             },
         };
     }
-
-    return { props: {} };
 }
 
 const AdminUsers = () => {

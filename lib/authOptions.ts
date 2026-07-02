@@ -13,8 +13,6 @@ import {
     findUserByEmail,
 } from "@/lib/users";
 
-void ensureUserDataReady();
-
 export const authOptions: NextAuthOptions = {
     providers: [
         GithubProvider({
