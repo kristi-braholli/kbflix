@@ -1,7 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import NavbarItem from "@/components/NavbarItem";
+import UserMenu from "@/components/UserMenu";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import { BsSearch } from "react-icons/bs";
 import { HiMenu, HiX } from "react-icons/hi";
+import { signOut } from "next-auth/react";
 
 interface NavbarProps {
     categories: { id: number; key: string; name: string }[];
@@ -28,6 +33,12 @@ const Navbar: React.FC<NavbarProps> = ({
                                            onType,
                                            suggestions,
                                        }) => {
+    const router = useRouter();
+    const { data: session } = useSession();
+    const { data: currentUser } = useCurrentUser();
+    const isAdmin = session?.user?.isAdmin || currentUser?.isAdmin;
+    const userName = session?.user?.name || currentUser?.name || "";
+    const userEmail = session?.user?.email || currentUser?.email || "";
     const [showDropdown, setShowDropdown] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
@@ -88,6 +99,12 @@ const Navbar: React.FC<NavbarProps> = ({
                         label="Categories"
                         onClick={() => setShowDropdown(!showDropdown)}
                     />
+                    {isAdmin && (
+                        <NavbarItem
+                            label="Manage Users"
+                            onClick={() => router.push("/admin/users")}
+                        />
+                    )}
 
                     {/* Desktop Dropdown */}
                     {showDropdown && (
@@ -112,8 +129,9 @@ const Navbar: React.FC<NavbarProps> = ({
                     )}
                 </div>
 
-                {/* Desktop Search */}
-                <div className="hidden md:block ml-auto relative" ref={searchWrapperRef}>
+                {/* Desktop Search + User */}
+                <div className="hidden md:flex ml-auto items-center gap-3">
+                    <div className="relative" ref={searchWrapperRef}>
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
@@ -159,10 +177,12 @@ const Navbar: React.FC<NavbarProps> = ({
                             ))}
                         </div>
                     )}
+                    </div>
+                    <UserMenu />
                 </div>
 
                 {/* Mobile Controls */}
-                <div className="flex md:hidden items-center gap-3">
+                <div className="flex md:hidden items-center gap-3 ml-auto">
                     {/* Mobile Search Icon */}
                     <button
                         onClick={() => setShowSearch(!showSearch)}
@@ -246,6 +266,17 @@ const Navbar: React.FC<NavbarProps> = ({
                         >
                             Home
                         </p>
+                        {isAdmin && (
+                            <p
+                                className="text-white py-3 cursor-pointer hover:bg-zinc-800 rounded-md px-3"
+                                onClick={() => {
+                                    router.push("/admin/users");
+                                    setShowMobileMenu(false);
+                                }}
+                            >
+                                Manage Users
+                            </p>
+                        )}
                         <p className="text-white py-3 px-3 font-semibold text-sm text-zinc-400">
                             Categories
                         </p>
@@ -263,6 +294,16 @@ const Navbar: React.FC<NavbarProps> = ({
                                     {cat.name}
                                 </p>
                             ))}
+                        </div>
+                        <div className="border-t border-zinc-800 mt-4 pt-4 px-3">
+                            <p className="text-white font-semibold">{userName}</p>
+                            <p className="text-zinc-400 text-sm mb-3">{userEmail}</p>
+                            <button
+                                onClick={() => signOut({ callbackUrl: "/auth" })}
+                                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md text-sm"
+                            >
+                                Logout
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,6 @@
 import React from "react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import {signOut} from "next-auth/react";
 
@@ -7,7 +9,10 @@ interface AccountMenuProps {
 }
 
 const AccountMenu: React.FC<AccountMenuProps> = ({visible}) => {
+    const router = useRouter();
+    const { data: session } = useSession();
     const {data: user} = useCurrentUser()
+    const isAdmin = session?.user?.isAdmin || user?.isAdmin;
 
     if (!visible) return null
 
@@ -21,7 +26,15 @@ const AccountMenu: React.FC<AccountMenuProps> = ({visible}) => {
                     </p>
                 </div>
                 <hr className="bg-gray-600 border-0 h-px my-4"/>
-                <div onClick={() => signOut()} className="px-3 text-center text-white text-sm hover:underline">
+                {isAdmin && (
+                    <div
+                        onClick={() => router.push("/admin/users")}
+                        className="px-3 text-center text-white text-sm hover:underline cursor-pointer"
+                    >
+                        Manage Users
+                    </div>
+                )}
+                <div onClick={() => signOut()} className="px-3 text-center text-white text-sm hover:underline cursor-pointer">
                     Sign out of Netflix
                 </div>
             </div>
