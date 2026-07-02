@@ -9,7 +9,10 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
     const [isWatchingMovie, setIsWatchingMovie] = useState(openedFromMoreInfo);
     const [imdbId, setImdbId] = useState<string | null>(null);
     const playerRef = useRef<any>(null);
+    const [server, setServer] = useState<string | null>(null);
+    const [movieIdType, setMovieIdType] = useState<string | null>(null);
 
+    console.log(imdbId,movie.id)
     useEffect(() => {
         // Merr trailer nga TMDB
         tmdb.get(`/movie/${movie.id}/videos`).then(res => {
@@ -110,7 +113,7 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
         }
     };
 
-    const handleWatchMovie = () => {
+    function handleWatchMovie (server: any, type: any){
         // Destroy YouTube player
         if (playerRef.current) {
             try {
@@ -121,6 +124,8 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
             playerRef.current = null;
         }
         setIsWatchingMovie(true);
+        setServer(server)
+        setMovieIdType(type)
     };
 
     const handleBackToTrailer = () => {
@@ -146,7 +151,7 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
                     // Show full movie
                     <div className="relative w-full h-[260px] md:h-[420px] bg-black">
                         <iframe
-                            src={`https://vidsrc-embed.ru/embed/movie?imdb=${imdbId}`}
+                            src={`${server}${movieIdType}`}
                             className="w-full h-full"
                             frameBorder="0"
                             allowFullScreen
@@ -199,11 +204,18 @@ export default function MovieModal({ movie, onClose, openedFromMoreInfo = false 
                     <div className="flex flex-wrap gap-3 mb-5">
                         {/* Watch Movie */}
                         <button
-                            onClick={handleWatchMovie}
+                            onClick={()=> {handleWatchMovie(process.env.NEXT_PUBLIC_SERVER_1, imdbId)}}
                             className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-md font-semibold"
                             disabled={!imdbId}
                         >
                             🎥 Watch Movie
+                        </button>
+                        <button
+                            onClick={()=> {handleWatchMovie(process.env.NEXT_PUBLIC_SERVER_2_FALLBACK, movie.id)}}
+                            className="bg-yellow-600 hover:bg-yellow-500 px-4 py-2 rounded-md font-semibold"
+                            disabled={!imdbId}
+                        >
+                            🎥 Server 2
                         </button>
                     </div>
 
